@@ -1,0 +1,55 @@
+{
+  "info": {
+    "name": "Delivery - Base de Microserviços",
+    "_postman_id": "4b3054f0-e428-4cdf-aa33-2e17d20a410e",
+    "description": "Coleção inicial para demonstrar a comunicação entre Catalogo e Pedidos.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "catalogoUrl",
+      "value": "http://localhost:8081"
+    },
+    {
+      "key": "pedidosUrl",
+      "value": "http://localhost:8082"
+    }
+  ],
+  "item": [
+    {
+      "name": "Catálogo",
+      "item": [
+        {
+          "name": "Buscar produto temporário",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{catalogoUrl}}/catalogo/produtos/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pedidos",
+      "item": [
+        {
+          "name": "Pré-validar pedido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"produtoId\": 1,\n  \"quantidade\": 2\n}"
+            },
+            "url": "{{pedidosUrl}}/pedidos/pre-validacoes"
+          }
+        }
+      ]
+    }
+  ]
+}
