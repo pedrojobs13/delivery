@@ -1,5 +1,6 @@
 package br.com.delivery.pedidos.repository;
 
+import br.com.delivery.pedidos.domain.FormaPagamento;
 import br.com.delivery.pedidos.domain.Pedido;
 import br.com.delivery.pedidos.domain.StatusPedido;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,4 +14,10 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     List<Pedido> findByStatus(StatusPedido status);
 
     List<Pedido> findByClienteNomeContainingIgnoreCase(String clienteNome);
+
+    List<Pedido> findByPago(boolean pago);
+
+    List<Pedido> findByFormaPagamento(FormaPagamento formaPagamento);
+
+    List<Pedido> findByStatusAndPago(StatusPedido status, boolean pago);
 }

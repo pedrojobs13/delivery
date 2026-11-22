@@ -25,9 +25,16 @@ public class Pedido {
 
     private String enderecoEntrega;
 
+    private Boolean pago = false;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private StatusPedido status = StatusPedido.PENDENTE;
+
+    @Enumerated(EnumType.STRING)
+    private FormaPagamento formaPagamento;
+
+    private LocalDateTime pagoEm;
 
     @Column(nullable = false)
     private BigDecimal valorTotal = BigDecimal.ZERO;
@@ -48,5 +55,21 @@ public class Pedido {
         this.valorTotal = itens.stream()
                 .map(ItemPedido::getSubtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public void marcarComoPago(FormaPagamento formaPagamento) {
+        if (Boolean.TRUE.equals(this.pago)) {
+            throw new IllegalStateException("Pedido já se encontra pago.");
+        }
+        if (this.status != StatusPedido.PENDENTE) {
+            throw new IllegalStateException("Apenas pedidos com status PENDENTE podem ser pagos. Status atual: " + this.status);
+        }
+        if (formaPagamento == null) {
+            throw new IllegalArgumentException("Forma de pagamento é obrigatória.");
+        }
+        this.pago = true;
+        this.formaPagamento = formaPagamento;
+        this.pagoEm = LocalDateTime.now();
+        this.status = StatusPedido.CONFIRMADO;
     }
 }

@@ -1,6 +1,5 @@
 package br.com.delivery.pedidos.infrastructure;
 
-import br.com.delivery.pedidos.api.PreValidacaoPedidoResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
