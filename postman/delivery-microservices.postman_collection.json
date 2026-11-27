@@ -2,7 +2,7 @@
   "info": {
     "name": "Delivery - Base de Microserviços",
     "_postman_id": "4b3054f0-e428-4cdf-aa33-2e17d20a410e",
-    "description": "Coleção inicial para demonstrar a comunicação entre Catalogo e Pedidos.",
+    "description": "Coleção com endpoints de Catalogo e Pedidos (incluindo pagamento simulado).",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -47,6 +47,64 @@
               "raw": "{\n  \"produtoId\": 1,\n  \"quantidade\": 2\n}"
             },
             "url": "{{pedidosUrl}}/pedidos/pre-validacoes"
+          }
+        },
+        {
+          "name": "Criar pedido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clienteNome\": \"Gabriel Silva\",\n  \"enderecoEntrega\": \"Rua das Flores, 123\",\n  \"itens\": [\n    {\n      \"produtoId\": 1,\n      \"quantidade\": 2,\n      \"precoUnitario\": 29.90\n    }\n  ]\n}"
+            },
+            "url": "{{pedidosUrl}}/pedidos"
+          }
+        },
+        {
+          "name": "Simular pagamento do pedido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"formaPagamento\": \"PIX\"\n}"
+            },
+            "url": "{{pedidosUrl}}/pedidos/1/pagar"
+          }
+        },
+        {
+          "name": "Consultar pedido por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{pedidosUrl}}/pedidos/1"
+          }
+        },
+        {
+          "name": "Listar todos os pedidos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{pedidosUrl}}/pedidos"
+          }
+        },
+        {
+          "name": "Listar pedidos confirmados/pagos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{pedidosUrl}}/pedidos?pago=true&status=CONFIRMADO"
           }
         }
       ]

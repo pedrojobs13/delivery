@@ -1,4 +1,4 @@
-package br.com.delivery.pedidos.api;
+package br.com.delivery.pedidos.api.dto;
 
 public record PreValidacaoPedidoResponse(
         Long produtoId,

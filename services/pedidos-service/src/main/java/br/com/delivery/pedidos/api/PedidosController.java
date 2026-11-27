@@ -1,21 +1,26 @@
 package br.com.delivery.pedidos.api;
 
+import br.com.delivery.pedidos.api.dto.*;
 import br.com.delivery.pedidos.infrastructure.CatalogoClient;
+import br.com.delivery.pedidos.domain.StatusPedido;
+import br.com.delivery.pedidos.service.PedidoService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/pedidos")
 public class PedidosController {
 
     private final CatalogoClient catalogoClient;
+    private final PedidoService pedidoService;
 
-    public PedidosController(CatalogoClient catalogoClient) {
+    public PedidosController(CatalogoClient catalogoClient, PedidoService pedidoService) {
         this.catalogoClient = catalogoClient;
+        this.pedidoService = pedidoService;
     }
 
     @PostMapping("/pre-validacoes")
@@ -33,5 +38,33 @@ public class PedidosController {
         );
 
         return ResponseEntity.ok(resposta);
+    }
+
+    @PostMapping
+    public ResponseEntity<PedidoResponse> criarPedido(@Valid @RequestBody CriarPedidoRequest request) {
+        PedidoResponse response = pedidoService.criarPedido(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<PedidoResponse> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(pedidoService.buscarPorId(id));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<PedidoResponse>> listar(
+            @RequestParam(required = false) StatusPedido status,
+            @RequestParam(required = false) Boolean pago
+    ) {
+        return ResponseEntity.ok(pedidoService.listar(status, pago));
+    }
+
+    @PostMapping("/{id}/pagar")
+    public ResponseEntity<PedidoResponse> pagarPedido(
+            @PathVariable Long id,
+            @Valid @RequestBody PagamentoRequest request
+    ) {
+        PedidoResponse response = pedidoService.simularPagamento(id, request.formaPagamento());
+        return ResponseEntity.ok(response);
     }
 }

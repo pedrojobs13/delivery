@@ -2,19 +2,17 @@
 
 Base inicial do trabalho da disciplina, desenvolvida com **Java 21**, **Spring Boot** e **Maven**.
 
-> Esta etapa cria somente a fundação técnica. Catálogo utiliza dados temporários em memória e ainda não existem regras finais de negócio, persistência, autenticação ou gateway.
-
 ## Estrutura
 
 ```text
 services/
-  catalogo-service/  # Porta 8081
-  pedidos-service/   # Porta 8082
+  catalogo-service/  # Porta 8081 (SQLite encapsulado em services/catalogo-service/catalogo.db)
+  pedidos-service/   # Porta 8082 (SQLite encapsulado em services/pedidos-service/pedido.db)
 postman/
   delivery-microservices.postman_collection.json
 ```
 
-Os serviços permanecem independentes. O `pedidos-service` consulta o `catalogo-service` por HTTP para realizar uma pré-validação de pedido.
+Os serviços operam de forma desacoplada seguindo o padrão *Database per Service*. O `pedidos-service` consulta o `catalogo-service` via HTTP (`CatalogoClient`).
 
 ## Pré-requisitos
 
@@ -35,27 +33,20 @@ Em outro terminal, inicie Pedidos:
 mvn -pl services/pedidos-service spring-boot:run
 ```
 
-## Endpoints iniciais
+> **Isolamento de Banco SQLite:** O plugin `spring-boot-maven-plugin` está configurado com `workingDirectory` no diretório de cada módulo. Dessa forma, mesmo iniciando a partir da raiz com `-pl`, o banco de dados SQLite de cada serviço é mantido estritamente encapsulado dentro do seu próprio diretório.
 
-```http
-GET http://localhost:8081/catalogo/produtos/1
-```
+## Endpoints
 
-```http
-POST http://localhost:8082/pedidos/pre-validacoes
-Content-Type: application/json
+### 1. Catálogo (`http://localhost:8081`)
 
-{
-  "produtoId": 1,
-  "quantidade": 2
-}
-```
+* `GET /catalogo/produtos/{id}`: Consulta dados de um produto no catálogo.
 
-Importe a coleção em `postman/delivery-microservices.postman_collection.json` para testar os dois endpoints.
+### 2. Pedidos (`http://localhost:8082`)
 
-## Próximos incrementos
+* `POST /pedidos/pre-validacoes`: Pré-valida disponibilidade do item no catálogo.
+* `POST /pedidos`: Cria um novo pedido com status inicial `PENDENTE` e `pago = false`.
+* `POST /pedidos/{id}/pagar`: Simula o pagamento do pedido (ex: `PIX`, `CARTAO_CREDITO`, `CARTAO_DEBITO`, `DINHEIRO`). Avança o status do pedido de `PENDENTE` para `CONFIRMADO` e define `pago = true` com timestamp `pagoEm`.
+* `GET /pedidos/{id}`: Consulta os detalhes do pedido por ID.
+* `GET /pedidos`: Lista pedidos com suporte a filtros opcionais por `status` e `pago` (ex: `/pedidos?status=CONFIRMADO&pago=true`).
 
-1. Definir as regras reais do domínio de delivery.
-2. Implementar persistência isolada para cada serviço.
-3. Criar testes e tratamento de erros.
-4. Avaliar gateway depois que a comunicação direta estiver validada.
+A coleção completa para testes está disponível em `postman/delivery-microservices.postman_collection.json`.

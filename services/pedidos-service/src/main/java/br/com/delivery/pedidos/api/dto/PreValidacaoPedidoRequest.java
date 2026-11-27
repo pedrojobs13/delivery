@@ -1,4 +1,4 @@
-package br.com.delivery.pedidos.api;
+package br.com.delivery.pedidos.api.dto;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
