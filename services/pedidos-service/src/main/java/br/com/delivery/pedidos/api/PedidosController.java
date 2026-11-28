@@ -67,4 +67,15 @@ public class PedidosController {
         PedidoResponse response = pedidoService.simularPagamento(id, request.formaPagamento());
         return ResponseEntity.ok(response);
     }
+
+    @PatchMapping("/{id}/situacao")
+    public ResponseEntity<PedidoResponse> alterarSituacao(
+            @PathVariable Long id, @Valid @RequestBody SituacaoRequest request) {
+        return ResponseEntity.ok(pedidoService.alterarSituacao(id, request.situacao()));
+    }
+
+    @PatchMapping("/{id}/cancelar")
+    public ResponseEntity<PedidoResponse> cancelar(@PathVariable Long id) {
+        return ResponseEntity.ok(pedidoService.cancelar(id));
+    }
 }
