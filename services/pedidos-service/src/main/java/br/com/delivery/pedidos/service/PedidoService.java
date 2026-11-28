@@ -77,6 +77,22 @@ public class PedidoService {
         return PedidoResponse.from(pedido);
     }
 
+    @Transactional
+    public PedidoResponse cancelar(Long pedidoId) {
+        Pedido pedido = pedidoRepository.findById(pedidoId)
+                .orElseThrow(() -> new NoSuchElementException("Pedido não encontrado com ID: " + pedidoId));
+        pedido.cancelar();
+        return PedidoResponse.from(pedidoRepository.save(pedido));
+    }
+
+    @Transactional
+    public PedidoResponse alterarSituacao(Long pedidoId, StatusPedido novaSituacao) {
+        Pedido pedido = pedidoRepository.findById(pedidoId)
+                .orElseThrow(() -> new NoSuchElementException("Pedido não encontrado com ID: " + pedidoId));
+        pedido.alterarSituacao(novaSituacao);
+        return PedidoResponse.from(pedidoRepository.save(pedido));
+    }
+
     @Transactional(readOnly = true)
     public List<PedidoResponse> listar(StatusPedido status, Boolean pago) {
         List<Pedido> pedidos;

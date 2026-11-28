@@ -66,6 +66,44 @@ class PedidoServiceTest {
     }
 
     @Test
+    void deveSalvarPedidoCancelado() {
+        Pedido pedido = new Pedido();
+        when(pedidoRepository.findById(1L)).thenReturn(Optional.of(pedido));
+        when(pedidoRepository.save(pedido)).thenReturn(pedido);
+        PedidoResponse resposta = pedidoService.cancelar(1L);
+        assertEquals(StatusPedido.CANCELADO, resposta.status());
+        verify(pedidoRepository).save(pedido);
+    }
+
+    @Test
+    void naoDeveCancelarPedidoInexistente() {
+        when(pedidoRepository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(java.util.NoSuchElementException.class, () -> pedidoService.cancelar(1L));
+        verify(pedidoRepository, never()).save(any());
+    }
+
+    @Test
+    void deveSalvarSituacaoAlterada() {
+        Pedido pedido = new Pedido();
+        pedido.setStatus(StatusPedido.CONFIRMADO);
+        when(pedidoRepository.findById(1L)).thenReturn(Optional.of(pedido));
+        when(pedidoRepository.save(pedido)).thenReturn(pedido);
+
+        PedidoResponse resposta = pedidoService.alterarSituacao(1L, StatusPedido.EM_PREPARO);
+
+        assertEquals(StatusPedido.EM_PREPARO, resposta.status());
+        verify(pedidoRepository).save(pedido);
+    }
+
+    @Test
+    void naoDeveAlterarSituacaoDePedidoInexistente() {
+        when(pedidoRepository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(java.util.NoSuchElementException.class,
+                () -> pedidoService.alterarSituacao(1L, StatusPedido.EM_PREPARO));
+        verify(pedidoRepository, never()).save(any());
+    }
+
+    @Test
     @DisplayName("Deve simular pagamento avançando de PENDENTE para CONFIRMADO")
     void deveSimularPagamentoComSucesso() {
         Pedido pedido = new Pedido();

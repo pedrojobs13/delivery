@@ -57,6 +57,27 @@ public class Pedido {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
+    public void alterarSituacao(StatusPedido novaSituacao) {
+        if (novaSituacao == null) {
+            throw new IllegalArgumentException("A nova situação é obrigatória.");
+        }
+        if ((status == StatusPedido.CONFIRMADO && novaSituacao == StatusPedido.EM_PREPARO)
+                || (status == StatusPedido.EM_PREPARO && novaSituacao == StatusPedido.SAIU_PARA_ENTREGA)
+                || (status == StatusPedido.SAIU_PARA_ENTREGA && novaSituacao == StatusPedido.ENTREGUE)) {
+            this.status = novaSituacao;
+            return;
+        }
+        throw new IllegalStateException("Não é possível alterar a situação de " + status + " para " + novaSituacao + ".");
+    }
+
+    public void cancelar() {
+        if (status != StatusPedido.PENDENTE && status != StatusPedido.CONFIRMADO
+                && status != StatusPedido.EM_PREPARO) {
+            throw new IllegalStateException("Não é possível cancelar pedido com situação " + status + ".");
+        }
+        this.status = StatusPedido.CANCELADO;
+    }
+
     public void marcarComoPago(FormaPagamento formaPagamento) {
         if (Boolean.TRUE.equals(this.pago)) {
             throw new IllegalStateException("Pedido já se encontra pago.");

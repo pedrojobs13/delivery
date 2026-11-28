@@ -59,6 +59,67 @@ class PedidoTest {
     }
 
     @Test
+    void deveAvancarSituacoesNaOrdem() {
+        Pedido pedido = new Pedido();
+        pedido.marcarComoPago(FormaPagamento.PIX);
+        pedido.alterarSituacao(StatusPedido.EM_PREPARO);
+        assertEquals(StatusPedido.EM_PREPARO, pedido.getStatus());
+        pedido.alterarSituacao(StatusPedido.SAIU_PARA_ENTREGA);
+        assertEquals(StatusPedido.SAIU_PARA_ENTREGA, pedido.getStatus());
+        pedido.alterarSituacao(StatusPedido.ENTREGUE);
+        assertEquals(StatusPedido.ENTREGUE, pedido.getStatus());
+    }
+
+    @Test
+    void naoDevePermitirTransicoesInvalidas() {
+        Pedido pedido = new Pedido();
+        assertThrows(IllegalStateException.class, () -> pedido.alterarSituacao(StatusPedido.CONFIRMADO));
+        pedido.marcarComoPago(FormaPagamento.PIX);
+        assertThrows(IllegalStateException.class, () -> pedido.alterarSituacao(StatusPedido.ENTREGUE));
+        assertThrows(IllegalStateException.class, () -> pedido.alterarSituacao(StatusPedido.PENDENTE));
+        assertThrows(IllegalArgumentException.class, () -> pedido.alterarSituacao(null));
+        pedido.setStatus(StatusPedido.CANCELADO);
+        assertThrows(IllegalStateException.class, () -> pedido.alterarSituacao(StatusPedido.EM_PREPARO));
+        pedido.setStatus(StatusPedido.ENTREGUE);
+        assertThrows(IllegalStateException.class, () -> pedido.alterarSituacao(StatusPedido.EM_PREPARO));
+    }
+
+    @Test
+    void deveCancelarAteEmPreparoEPreservarPagamento() {
+        Pedido pendente = new Pedido();
+        pendente.cancelar();
+        assertEquals(StatusPedido.CANCELADO, pendente.getStatus());
+        assertFalse(pendente.getPago());
+
+        Pedido confirmado = new Pedido();
+        confirmado.marcarComoPago(FormaPagamento.PIX);
+        var dataPagamento = confirmado.getPagoEm();
+        confirmado.cancelar();
+        assertEquals(StatusPedido.CANCELADO, confirmado.getStatus());
+        assertTrue(confirmado.getPago());
+        assertEquals(FormaPagamento.PIX, confirmado.getFormaPagamento());
+        assertEquals(dataPagamento, confirmado.getPagoEm());
+
+        Pedido emPreparo = new Pedido();
+        emPreparo.marcarComoPago(FormaPagamento.PIX);
+        emPreparo.alterarSituacao(StatusPedido.EM_PREPARO);
+        emPreparo.cancelar();
+        assertEquals(StatusPedido.CANCELADO, emPreparo.getStatus());
+    }
+
+    @Test
+    void naoDeveCancelarPedidoEmEntregaEntregueOuCancelado() {
+        Pedido pedido = new Pedido();
+        pedido.setStatus(StatusPedido.SAIU_PARA_ENTREGA);
+        assertThrows(IllegalStateException.class, pedido::cancelar);
+        pedido.setStatus(StatusPedido.ENTREGUE);
+        assertThrows(IllegalStateException.class, pedido::cancelar);
+        pedido.setStatus(StatusPedido.CANCELADO);
+        assertThrows(IllegalStateException.class, pedido::cancelar);
+        assertThrows(IllegalStateException.class, () -> pedido.marcarComoPago(FormaPagamento.PIX));
+    }
+
+    @Test
     @DisplayName("Deve recalcular o valor total ao adicionar itens")
     void deveRecalcularValorTotal() {
         Pedido pedido = new Pedido();
